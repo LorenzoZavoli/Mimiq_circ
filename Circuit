@@ -7,7 +7,8 @@ import numpy as np
 conn = MimiqConnection(url="https://mimiq.qperfect.io/api")
 conn.connect()
 
-def Build_QAOA(B, beta, gamma, q, draw=False):
+def Build_QAOA(B, q, draw=False):
+    beta, gamma = symbols('beta gamma')
 
     n=len(B) #Qubit number
 
@@ -34,9 +35,11 @@ def Build_QAOA(B, beta, gamma, q, draw=False):
     
 A=np.random.rand(6,6)
 
-def Run_QAOA(B, beta, gamma, p, connect):
-    b = Build_QAOA(B, beta, p, gamma) 
-    job_id = connect.execute(b)
+circuit = Build_QAOA(A, 2) 
+
+def Run_QAOA(circuit, beta, gamma, connect):
+    ev_circ = circuit.evaluate({'beta':beta, 'gamma': gamma})
+    job_id = connect.execute(ev_circ)
     res = connect.get_result(job_id)
     return res
 
@@ -45,3 +48,4 @@ r = Run_QAOA(A, 3, 2, 2, conn)
 plothistogram(r)
       
 print(r)
+
