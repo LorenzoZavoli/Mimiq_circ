@@ -1,4 +1,5 @@
 from mimiqcircuits import *
+from mimiqcircuits.visualization import *
 from symengine import *
 import networkx as nx
 import numpy as np
@@ -6,36 +7,41 @@ import numpy as np
 conn = MimiqConnection(url="https://mimiq.qperfect.io/api")
 conn.connect()
 
-def Build_QAOA(B, beta, gamma, draw=False):
+def Build_QAOA(B, beta, gamma, q, draw=False):
 
-    
     n=len(B) #Qubit number
 
     c=Circuit() #Circuit definition
     c.push(GateH(), range(0, n))
+        
+    for k in range(0,q):
 
-    #Block here
-    for i in range(0,n) :
-        for j in range(i+1,n):
-            A_ij = B[i,j]
-            if A_ij != 0:
-                c.push(GateRZZ(gamma*A_ij), i, j)    #The Upeer one is ALWAYS the control one
+        #Block here
+        for i in range(0,n) :
+            for j in range(i+1,n):
+                A_ij = B[i,j]
+                if A_ij != 0:
+                    c.push(GateRZZ(gamma*A_ij), i, j)    #The Upeer one is ALWAYS the control one
 
-    #Block Here
-    
-    c.push(GateRX(beta), range(0,n))
+        #Block Here
+        
+        c.push(GateRX(beta), range(0,n))
+        
     if draw:
         c.draw()
+
     return c
     
 A=np.random.rand(6,6)
 
-def Run_QAOA(B, beta, gamma, connect):
-    b = Build_QAOA(B, beta, gamma) 
+def Run_QAOA(B, beta, gamma, p, connect):
+    b = Build_QAOA(B, beta, p, gamma) 
     job_id = connect.execute(b)
     res = connect.get_result(job_id)
     return res
 
-r = Run_QAOA(A, 3, 2, conn)
-       
+r = Run_QAOA(A, 3, 2, 2, conn)
+
+plothistogram(r)
+      
 print(r)
